@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050817">
+  <title>Zenith Intelligence | Financial Valuation Studio</title>
+  <meta name="description" content="Explore company valuation with Zenith Intelligence's interactive DCF and WACC financial modelling engine.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: { ink:'#050817', panel:'#0b1226', cyan:'#42e8f5', blue:'#477dff', violet:'#a78bfa', gold:'#f5c76a' },
+        fontFamily: { sans:['DM Sans','sans-serif'], display:['Space Grotesk','sans-serif'] }
+      }}
+    };
+  </script>
+  <style>
+    :root { color-scheme: dark; }
+    * { scroll-behavior:smooth; }
+    body {
+      background:
+        radial-gradient(ellipse at 12% 5%, rgba(48,112,255,.18), transparent 34rem),
+        radial-gradient(ellipse at 88% 20%, rgba(168,85,247,.13), transparent 32rem),
+        radial-gradient(ellipse at 55% 80%, rgba(0,220,230,.08), transparent 35rem),
+        #050817;
+      color:#eef3ff; font-family:'DM Sans',sans-serif;
+    }
+    .glass { background:linear-gradient(145deg,rgba(17,29,57,.88),rgba(8,14,30,.88)); border:1px solid rgba(148,177,255,.13); box-shadow:0 20px 70px rgba(0,0,0,.22); backdrop-filter:blur(18px); }
+    .glass-soft { background:rgba(12,21,42,.72); border:1px solid rgba(148,177,255,.12); }
+    .gradient-text { background:linear-gradient(100deg,#ffe18a 0%,#42e8f5 30%,#658dff 58%,#c084fc 80%,#fb7185 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .rainbow-line { height:2px; background:linear-gradient(90deg,#fbbf24,#42e8f5,#477dff,#a78bfa,#fb7185); }
+    .logo-tile { background:linear-gradient(145deg,#182644,#080e20); border:1px solid rgba(255,255,255,.18); box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 12px 28px rgba(0,0,0,.35),0 0 30px rgba(66,232,245,.12); }
+    .logo-mark { filter:drop-shadow(0 8px 10px rgba(0,0,0,.5)) drop-shadow(0 0 15px rgba(66,232,245,.22)); }
+    .eyebrow { letter-spacing:.2em; text-transform:uppercase; font-size:.68rem; font-weight:800; color:#79eaf2; }
+    .field { width:100%; background:#070d1d; border:1px solid rgba(148,177,255,.18); border-radius:12px; padding:11px 12px; color:#f4f7ff; font:600 .9rem 'DM Sans',sans-serif; outline:none; transition:.2s; }
+    .field:focus { border-color:#42e8f5; box-shadow:0 0 0 3px rgba(66,232,245,.1); }
+    .field-label { display:block; color:#9eacc9; font-size:.74rem; font-weight:700; margin-bottom:7px; }
+    .btn-primary { background:linear-gradient(105deg,#19bfd2,#326cf2); color:white; box-shadow:0 8px 28px rgba(42,135,240,.23); transition:.2s; }
+    .btn-primary:hover { transform:translateY(-2px); filter:brightness(1.1); }
+    .btn-quiet { border:1px solid rgba(148,177,255,.2); background:rgba(255,255,255,.035); color:#cbd7f2; }
+    .btn-quiet:hover { border-color:rgba(66,232,245,.5); color:white; }
+    .metric { background:linear-gradient(145deg,rgba(17,31,62,.96),rgba(8,15,32,.96)); border:1px solid rgba(148,177,255,.13); }
+    .metric-value { font-family:'Space Grotesk',sans-serif; letter-spacing:-.04em; }
+    .method-card { transition:transform .22s,border-color .22s,box-shadow .22s; }
+    .method-card:hover { transform:translateY(-5px); border-color:rgba(66,232,245,.35); box-shadow:0 18px 45px rgba(0,0,0,.25); }
+    .pulse-dot { box-shadow:0 0 0 5px rgba(52,211,153,.1),0 0 16px rgba(52,211,153,.55); }
+    .grid-bg { background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px); background-size:34px 34px; }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="rainbow-line"></div>
+  <div class="border-b border-white/5 bg-[#080e20]/80">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap justify-center items-center gap-x-3 gap-y-1 text-xs text-slate-300 text-center">
+      <span class="rounded-full px-2.5 py-1 bg-cyan-300/10 border border-cyan-300/20 text-cyan-200 font-extrabold tracking-wider">LIVE MODEL DEMO</span>
+      <span>Explore the Zenith Intelligence Financial Valuation Studio</span>
+      <a href="#engine" class="text-cyan-300 hover:text-white underline underline-offset-4">Open the model ↓</a>
+    </div>
+  </div>
+
+  <header class="sticky top-0 z-40 bg-[#070c1b]/85 backdrop-blur-xl border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-[76px] flex items-center justify-between gap-4">
+      <a href="#" class="flex items-center gap-3 shrink-0" aria-label="Zenith Intelligence home">
+        <div class="logo-tile w-12 h-12 rounded-2xl p-1.5">
+          <svg class="logo-mark w-full h-full" viewBox="0 0 100 100" fill="none" role="img" aria-label="Zenith colourful Z logo">
+            <defs>
+              <linearGradient id="zTopNav" x1="8" y1="12" x2="90" y2="38"><stop stop-color="#ffe66d"/><stop offset=".48" stop-color="#ff9f43"/><stop offset="1" stop-color="#42e8f5"/></linearGradient>
+              <linearGradient id="zDiagNav" x1="14" y1="22" x2="86" y2="82"><stop stop-color="#42e8f5"/><stop offset=".42" stop-color="#477dff"/><stop offset=".72" stop-color="#a78bfa"/><stop offset="1" stop-color="#fb7185"/></linearGradient>
+              <linearGradient id="zBottomNav" x1="20" y1="68" x2="88" y2="94"><stop stop-color="#c084fc"/><stop offset=".55" stop-color="#ec4899"/><stop offset="1" stop-color="#ffad5c"/></linearGradient>
+            </defs>
+            <path d="M14 14H86V29L39 68H86V86H14V71L61 32H14V14Z" fill="url(#zDiagNav)"/>
+            <path d="M14 14H86L61 32H14V14Z" fill="url(#zTopNav)"/>
+            <path d="M39 68H86V86H14L39 68Z" fill="url(#zBottomNav)"/>
+            <path d="M14 14H86V17H14Z" fill="white" opacity=".35"/>
+          </svg>
+        </div>
+        <div>
+          <div class="font-display text-lg sm:text-xl font-bold tracking-[.16em] text-white leading-tight">ZENITH</div>
+          <div class="text-[9px] tracking-[.38em] font-extrabold text-cyan-300">INTELLIGENCE</div>
+        </div>
+      </a>
+      <nav class="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-300">
+        <a class="hover:text-cyan-300 transition" href="#engine">Valuation engine</a>
+        <a class="hover:text-cyan-300 transition" href="#methodologies">Methodologies</a>
+        <a class="hover:text-cyan-300 transition" href="#how-it-works">How it works</a>
+        <a class="hover:text-cyan-300 transition" href="#contact">Contact</a>
+      </nav>
+      <a href="#engine" class="btn-primary rounded-xl px-4 sm:px-5 py-3 text-xs sm:text-sm font-extrabold">Explore live model <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="relative py-14 sm:py-20 lg:py-24 grid-bg overflow-hidden">
+      <div class="absolute -top-20 -left-24 w-80 h-80 rounded-full bg-blue-500/10 blur-[100px] pointer-events-none"></div>
+      <div class="absolute top-16 right-0 w-96 h-96 rounded-full bg-fuchsia-500/10 blur-[110px] pointer-events-none"></div>
+      <div class="relative grid lg:grid-cols-[1.12fr_.88fr] gap-12 items-center">
+        <div class="space-y-7">
+          <div class="inline-flex items-center gap-2.5 rounded-full border border-cyan-300/20 bg-cyan-300/[.07] px-4 py-2 text-xs font-bold text-cyan-100">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
+            FINANCIAL INTELLIGENCE · INTERACTIVE DEMONSTRATION
+          </div>
+          <div class="space-y-5">
+            <h1 class="font-display text-[2.65rem] sm:text-6xl xl:text-[4.35rem] leading-[1.08] font-bold tracking-[-.045em]">
+              Clarity behind<br><span class="gradient-text">every number.</span>
+            </h1>
+            <p class="max-w-xl text-slate-300 text-base sm:text-lg leading-8">Explore business value through a live financial model. Adjust assumptions, test scenarios and see how cash flow, risk and growth influence an indicative company valuation.</p>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a href="#engine" class="btn-primary rounded-xl px-6 py-3.5 font-extrabold text-sm">Try the live DCF model <span class="ml-2">→</span></a>
+            <a href="#methodologies" class="btn-quiet rounded-xl px-6 py-3.5 font-bold text-sm">Explore methodologies</a>
+          </div>
+          <div class="flex flex-wrap gap-x-7 gap-y-3 pt-2 text-xs text-slate-400">
+            <span class="flex items-center gap-2"><span class="text-cyan-300">✦</span> Interactive assumptions</span>
+            <span class="flex items-center gap-2"><span class="text-violet-300">✦</span> Instant recalculation</span>
+            <span class="flex items-center gap-2"><span class="text-amber-300">✦</span> South African rand display</span>
+          </div>
+        </div>
+        <div class="relative max-w-lg w-full mx-auto">
+          <div class="absolute inset-8 rounded-full bg-cyan-400/10 blur-3xl"></div>
+          <div class="glass relative rounded-[2rem] p-5 sm:p-7">
+            <div class="flex items-center justify-between mb-5">
+              <span class="eyebrow">Zenith identity</span>
+              <span class="text-[10px] text-slate-500 tracking-widest">01 / FINANCIAL STUDIO</span>
+            </div>
+            <div class="rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-[#111d39] via-[#0a1227] to-[#17102b] aspect-[1.13/1] flex flex-col items-center justify-center relative overflow-hidden">
+              <div class="absolute inset-0 opacity-50" style="background:radial-gradient(circle at 50% 40%,rgba(66,232,245,.18),transparent 55%),radial-gradient(circle at 70% 80%,rgba(236,72,153,.15),transparent 45%)"></div>
+              <div class="absolute inset-0 grid-bg opacity-50"></div>
+              <svg class="logo-mark relative w-44 sm:w-56 h-44 sm:h-56" viewBox="0 0 100 100" fill="none" role="img" aria-label="Zenith Intelligence 3D rainbow Z">
+                <defs>
+                  <linearGradient id="zTopHero" x1="8" y1="10" x2="90" y2="38"><stop stop-color="#fff18a"/><stop offset=".42" stop-color="#ff9f43"/><stop offset="1" stop-color="#42e8f5"/></linearGradient>
+                  <linearGradient id="zDiagHero" x1="12" y1="20" x2="90" y2="88"><stop stop-color="#42e8f5"/><stop offset=".36" stop-color="#397cf7"/><stop offset=".68" stop-color="#a855f7"/><stop offset="1" stop-color="#f43f5e"/></linearGradient>
+                  <linearGradient id="zBotHero" x1="14" y1="65" x2="88" y2="92"><stop stop-color="#c084fc"/><stop offset=".52" stop-color="#ec4899"/><stop offset="1" stop-color="#fb923c"/></linearGradient>
+                </defs>
+                <path d="M14 14H86V29L39 68H86V86H14V71L61 32H14V14Z" fill="url(#zDiagHero)"/>
+                <path d="M14 14H86L61 32H14V14Z" fill="url(#zTopHero)"/>
+                <path d="M39 68H86V86H14L39 68Z" fill="url(#zBotHero)"/>
+                <path d="M14 14H86V18H14Z" fill="#fff" opacity=".35"/>
+                <path d="M14 14V32L61 32L86 14H14Z" fill="#fff" opacity=".08"/>
+              </svg>
+              <div class="relative text-center mt-1">
+                <div class="font-display text-2xl sm:text-3xl tracking-[.28em] font-bold">ZENITH</div>
+                <div class="text-[10px] text-cyan-200 font-extrabold tracking-[.55em] mt-1">INTELLIGENCE</div>
+              </div>
+              <div class="absolute bottom-4 left-4 right-4 flex justify-between text-[10px] text-slate-400 tracking-wider">
+                <span>IDEAS → SYSTEMS</span><span>BUILT WITH INTENT</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-4">
+              <div class="glass-soft rounded-xl p-3"><div class="text-[10px] text-slate-500">MODEL</div><div class="text-xs font-bold text-cyan-200 mt-1">DCF / WACC</div></div>
+              <div class="glass-soft rounded-xl p-3"><div class="text-[10px] text-slate-500">HORIZON</div><div class="text-xs font-bold text-violet-200 mt-1">5 years</div></div>
+              <div class="glass-soft rounded-xl p-3"><div class="text-[10px] text-slate-500">CURRENCY</div><div class="text-xs font-bold text-amber-200 mt-1">ZAR · R</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="engine" class="py-12 sm:py-16 scroll-mt-24">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-5 mb-8">
+        <div>
+          <div class="eyebrow mb-3">Live interactive simulation</div>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold">DCF valuation engine</h2>
+          <p class="text-slate-400 mt-3 max-w-2xl text-sm sm:text-base leading-7">Change any assumption below. The weighted average cost of capital, discounted cash flows and indicative enterprise value recalculate automatically.</p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button id="resetBtn" class="btn-quiet rounded-xl px-4 py-2.5 text-xs font-bold">↺ Reset example</button>
+          <button id="csvBtn" class="btn-quiet rounded-xl px-4 py-2.5 text-xs font-bold">↓ Export results CSV</button>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-[.86fr_1.14fr] gap-6 items-start">
+        <div class="space-y-5">
+          <div class="glass rounded-2xl p-5 sm:p-6">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+              <div><div class="text-sm font-extrabold">01 · Capital structure</div><div class="text-xs text-slate-500 mt-1">Market values and financing assumptions</div></div>
+              <span class="text-[10px] text-cyan-200 bg-cyan-300/10 border border-cyan-300/20 rounded-full px-2.5 py-1">WACC INPUTS</span>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div><label class="field-label" for="equity">Equity market value (R)</label><input class="field" type="number" id="equity" min="0" step="10000" value="1000000"></div>
+              <div><label class="field-label" for="debt">Debt market value (R)</label><input class="field" type="number" id="debt" min="0" step="10000" value="250000"></div>
+              <div><label class="field-label" for="tax">Corporate tax rate (%)</label><input class="field" type="number" id="tax" min="0" max="100" step=".5" value="27"></div>
+              <div><label class="field-label" for="growth">Terminal growth rate (%)</label><input class="field" type="number" id="growth" min="-20" max="30" step=".1" value="3"></div>
+              <div><label class="field-label" for="costEquity">Cost of equity (%)</label><input class="field" type="number" id="costEquity" min="0" max="100" step=".1" value="12"></div>
+              <div><label class="field-label" for="costDebt">Pre-tax cost of debt (%)</label><input class="field" type="number" id="costDebt" min="0" max="100" step=".1" value="7.5"></div>
+            </div>
+          </div>
+          <div class="glass rounded-2xl p-5 sm:p-6">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+              <div><div class="text-sm font-extrabold">02 · Cash flow forecast</div><div class="text-xs text-slate-500 mt-1">Projected free cash flow by year (R)</div></div>
+              <span class="text-[10px] text-amber-200 bg-amber-300/10 border border-amber-300/20 rounded-full px-2.5 py-1">5-YEAR FCF</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div><label class="field-label" for="fcf1">Year 1</label><input class="field text-center" type="number" id="fcf1" value="150000" step="10000"></div>
+              <div><label class="field-label" for="fcf2">Year 2</label><input class="field text-center" type="number" id="fcf2" value="180000" step="10000"></div>
+              <div><label class="field-label" for="fcf3">Year 3</label><input class="field text-center" type="number" id="fcf3" value="215000" step="10000"></div>
+              <div><label class="field-label" for="fcf4">Year 4</label><input class="field text-center" type="number" id="fcf4" value="250000" step="10000"></div>
+              <div><label class="field-label" for="fcf5">Year 5</label><input class="field text-center" type="number" id="fcf5" value="290000" step="10000"></div>
+            </div>
+            <div class="mt-5 pt-4 border-t border-white/10">
+              <div class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-3">Quick scenario simulation</div>
+              <div class="flex flex-wrap gap-2">
+                <button class="scenario btn-quiet rounded-lg px-3 py-2 text-xs font-bold" data-scenario="conservative">Conservative</button>
+                <button class="scenario btn-quiet rounded-lg px-3 py-2 text-xs font-bold" data-scenario="base">Base case</button>
+                <button class="scenario btn-quiet rounded-lg px-3 py-2 text-xs font-bold" data-scenario="growth">Growth case</button>
+              </div>
+              <p id="scenarioNote" class="text-[11px] text-slate-500 mt-3">Base case loaded. Select a scenario to see the valuation respond.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-5">
+          <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            <div class="metric rounded-2xl p-4"><div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">WACC</div><div id="outWacc" class="metric-value text-2xl font-bold text-amber-300 mt-2">—</div><div class="text-[10px] text-slate-500 mt-1">Discount rate</div></div>
+            <div class="metric rounded-2xl p-4"><div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">PV of forecast FCF</div><div id="outPvFcf" class="metric-value text-xl font-bold text-cyan-200 mt-2">—</div><div class="text-[10px] text-slate-500 mt-1">Years 1–5</div></div>
+            <div class="metric rounded-2xl p-4"><div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">PV of terminal value</div><div id="outPvTv" class="metric-value text-xl font-bold text-violet-200 mt-2">—</div><div class="text-[10px] text-slate-500 mt-1">Gordon growth method</div></div>
+            <div class="rounded-2xl p-4 border border-cyan-300/30 bg-gradient-to-br from-[#123b60] via-[#101d3a] to-[#211538] shadow-[0_12px_40px_rgba(26,170,220,.12)]"><div class="text-[10px] uppercase tracking-wider text-cyan-100 font-bold">Enterprise value</div><div id="outEv" class="metric-value text-xl sm:text-2xl font-bold gradient-text mt-2">—</div><div class="text-[10px] text-cyan-100/60 mt-1">Indicative DCF value</div></div>
+          </div>
+          <div id="validation" class="hidden rounded-xl border border-rose-400/30 bg-rose-400/10 text-rose-200 px-4 py-3 text-xs leading-5" role="alert"></div>
+          <div class="glass rounded-2xl p-5 sm:p-6">
+            <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
+              <div><div class="text-sm font-extrabold">Cash flow trajectory</div><div class="text-xs text-slate-500 mt-1">Forecast cash flow compared with present value</div></div>
+              <span class="text-[10px] text-cyan-200">LIVE CHART</span>
+            </div>
+            <div class="h-[270px] sm:h-[320px]"><canvas id="dcfChart" aria-label="Projected free cash flow and present value chart"></canvas></div>
+          </div>
+          <div class="glass rounded-2xl p-5 sm:p-6">
+            <div class="flex items-center justify-between mb-4"><div class="text-sm font-extrabold">Valuation breakdown</div><span class="text-[10px] text-slate-500">ZAR · illustrative</span></div>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between gap-4"><span class="text-slate-400">Present value of forecast cash flows</span><strong id="breakFcf" class="text-slate-100 font-mono">—</strong></div>
+              <div class="flex justify-between gap-4"><span class="text-slate-400">Present value of terminal value</span><strong id="breakTv" class="text-slate-100 font-mono">—</strong></div>
+              <div class="h-px bg-white/10"></div>
+              <div class="flex justify-between gap-4 text-sm"><span class="font-bold text-white">Enterprise value</span><strong id="breakEv" class="text-cyan-200 font-mono">—</strong></div>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500 leading-5">Demonstration only. Outputs depend on user-entered assumptions and are not investment, tax, audit or transaction advice. This simplified model assumes annual year-end cash flows and a constant terminal growth rate.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="py-12 sm:py-16 border-t border-white/5 scroll-mt-24">
+      <div class="max-w-3xl mb-8"><div class="eyebrow mb-3">Inside the simulation</div><h2 class="font-display text-3xl sm:text-4xl font-bold">From assumptions to an indicative value.</h2><p class="text-slate-400 mt-3 leading-7">The DCF model estimates the present value of future free cash flows and a terminal value, using WACC as its discount rate.</p></div>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <div class="glass rounded-2xl p-5"><div class="text-cyan-300 text-2xl font-display font-bold">01</div><h3 class="font-bold mt-3">Set the assumptions</h3><p class="text-xs text-slate-400 leading-6 mt-2">Enter capital values, financing costs, tax and expected growth.</p></div>
+        <div class="glass rounded-2xl p-5"><div class="text-violet-300 text-2xl font-display font-bold">02</div><h3 class="font-bold mt-3">Forecast cash flows</h3><p class="text-xs text-slate-400 leading-6 mt-2">Add five years of projected free cash flow and test different scenarios.</p></div>
+        <div class="glass rounded-2xl p-5"><div class="text-amber-300 text-2xl font-display font-bold">03</div><h3 class="font-bold mt-3">Explore the result</h3><p class="text-xs text-slate-400 leading-6 mt-2">Review WACC, discounted cash flows, terminal value and enterprise value.</p></div>
+      </div>
+    </section>
+
+    <section id="methodologies" class="py-12 sm:py-16 border-t border-white/5 scroll-mt-24">
+      <div class="mb-8"><div class="eyebrow mb-3">Valuation frameworks</div><h2 class="font-display text-3xl sm:text-4xl font-bold">Six ways to examine business value.</h2><p class="text-slate-400 mt-3 max-w-2xl text-sm leading-7">Different methods answer different questions. A robust valuation may consider more than one approach and reconcile the results.</p></div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <article class="method-card glass rounded-2xl p-5"><div class="text-cyan-300 text-xs font-extrabold tracking-widest">01 / INCOME</div><h3 class="font-bold text-lg mt-3">Discounted Cash Flow</h3><div class="text-xs text-cyan-200 font-mono mt-2">PV of forecast FCF + PV of TV</div><p class="text-xs text-slate-400 leading-6 mt-3">Estimates intrinsic enterprise value by discounting expected future cash flows.</p></article>
+        <article class="method-card glass rounded-2xl p-5"><div class="text-blue-300 text-xs font-extrabold tracking-widest">02 / MARKET</div><h3 class="font-bold text-lg mt-3">Comparable Companies</h3><div class="text-xs text-blue-200 font-mono mt-2">Enterprise value ÷ operating metric</div><p class="text-xs text-slate-400 leading-6 mt-3">Uses trading multiples from comparable listed businesses as a market reference.</p></article>
+        <article class="method-card glass rounded-2xl p-5"><div class="text-violet-300 text-xs font-extrabold tracking-widest">03 / MARKET</div><h3 class="font-bold text-lg mt-3">Precedent Transactions</h3><div class="text-xs text-violet-200 font-mono mt-2">Transaction value ÷ financial metric</div><p class="text-xs text-slate-400 leading-6 mt-3">Considers prices paid in relevant acquisitions, including deal-specific factors.</p></article>
+        <article class="method-card glass rounded-2xl p-5"><div class="text-fuchsia-300 text-xs font-extrabold tracking-widest">04 / ASSET</div><h3 class="font-bold text-lg mt-3">Asset-Based Valuation</h3><div class="text-xs text-fuchsia-200 font-mono mt-2">Fair value of assets − liabilities</div><p class="text-xs text-slate-400 leading-6 mt-3">Examines the fair value of assets and obligations, with adjustments where appropriate.</p></article>
+        <article class="method-card glass rounded-2xl p-5"><div class="text-amber-300 text-xs font-extrabold tracking-widest">05 / EARNINGS</div><h3 class="font-bold text-lg mt-3">Earnings Multiples</h3><div class="text-xs text-amber-200 font-mono mt-2">EBITDA × selected market multiple</div><p class="text-xs text-slate-400 leading-6 mt-3">Applies a relevant earnings multiple, informed by sector, scale and risk.</p></article>
+        <article class="method-card glass rounded-2xl p-5"><div class="text-rose-300 text-xs font-extrabold tracking-widest">06 / DOWNSIDE</div><h3 class="font-bold text-lg mt-3">Liquidation Valuation</h3><div class="text-xs text-rose-200 font-mono mt-2">Realizable asset proceeds − costs − liabilities</div><p class="text-xs text-slate-400 leading-6 mt-3">Considers potential net proceeds if assets are sold and obligations settled.</p></article>
+      </div>
+    </section>
+
+    <section id="contact" class="py-12 sm:py-16">
+      <div class="glass rounded-[1.7rem] p-7 sm:p-10 relative overflow-hidden">
+        <div class="absolute -right-16 -top-24 w-72 h-72 rounded-full bg-blue-500/10 blur-3xl"></div>
+        <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-7">
+          <div class="max-w-2xl"><div class="eyebrow mb-3">Built around your business</div><h2 class="font-display text-3xl sm:text-4xl font-bold">Your idea. Our expertise.</h2><p class="text-slate-300 text-sm sm:text-base leading-7 mt-3">Zenith Intelligence builds practical software, AI automation and business systems designed around the way organisations work.</p></div>
+          <div class="flex flex-col sm:flex-row gap-3 shrink-0">
+            <a href="mailto:info@zenithintel.space?subject=Zenith%20Intelligence%20Enquiry" class="btn-primary rounded-xl px-6 py-3.5 text-center text-sm font-extrabold">Contact Zenith ↗</a>
+            <a href="https://zenithintel.space" target="_blank" rel="noopener noreferrer" class="btn-quiet rounded-xl px-6 py-3.5 text-center text-sm font-bold">Visit website</a>
+          </div>
+        </div>
+        <div class="rainbow-line mt-8 opacity-70"></div>
+        <div class="grid sm:grid-cols-2 gap-4 mt-5 text-xs text-slate-400">
+          <a href="mailto:info@zenithintel.space" class="hover:text-cyan-200">✉ info@zenithintel.space</a>
+          <a href="https://zenithintel.space" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-200">⌘ zenithintel.space</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/5 bg-[#060a16]/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-7 flex flex-col sm:flex-row gap-4 justify-between items-center text-[11px] text-slate-500">
+      <div class="flex items-center gap-2">
+        <span class="font-display font-bold tracking-[.16em] text-slate-200">ZENITH INTELLIGENCE</span>
+        <span>© <span id="year"></span> All rights reserved.</span>
+      </div>
+      <span>Software built to your spec. Simple to use. Serious underneath.</span>
+    </div>
+  </footer>
+
+  <script>
+    const ids = ['equity','debt','tax','growth','costEquity','costDebt','fcf1','fcf2','fcf3','fcf4','fcf5'];
+    const $ = id => document.getElementById(id);
+    const money = value => new Intl.NumberFormat('en-ZA',{style:'currency',currency:'ZAR',maximumFractionDigits:0}).format(Number.isFinite(value) ? value : 0);
+    const number = id => Number($(id).value);
+    let chart = null;
+    let latest = null;
+
+    function readInputs() {
+      return {
+        equity:number('equity'), debt:number('debt'), tax:number('tax')/100,
+        growth:number('growth')/100, re:number('costEquity')/100, rd:number('costDebt')/100,
+        fcfs:[1,2,3,4,5].map(i => number('fcf'+i))
+      };
+    }
+
+    function showError(message) {
+      const box = $('validation');
+      box.textContent = message;
+      box.classList.remove('hidden');
+    }
+
+    function clearError() { $('validation').classList.add('hidden'); }
+
+    function runModel() {
+      const x = readInputs();
+      const values = [x.equity,x.debt,x.tax,x.growth,x.re,x.rd,...x.fcfs];
+      if (values.some(v => !Number.isFinite(v))) { showError('Please enter valid numbers in all model fields.'); return; }
+      if (x.equity < 0 || x.debt < 0 || x.tax < 0 || x.tax > 1 || x.re < 0 || x.rd < 0 || x.growth <= -1 || x.growth > 1) {
+        showError('Check your assumptions: capital values and rates must be within sensible ranges. Tax must be 0–100%, and terminal growth must be greater than -100%.'); return;
+      }
+      const capital = x.equity + x.debt;
+      if (capital <= 0) { showError('Enter a positive equity value or debt value to calculate WACC.'); return; }
+      const wacc = (x.equity/capital)*x.re + (x.debt/capital)*x.rd*(1-x.tax);
+      if (wacc <= x.growth) { showError('The WACC must be greater than the terminal growth rate for the Gordon Growth terminal value calculation. Adjust the rates to continue.'); return; }
+      clearError();
+
+      const pvCashFlows = x.fcfs.map((fcf,i) => fcf / Math.pow(1+wacc,i+1));
+      const pvFcf = pvCashFlows.reduce((a,b)=>a+b,0);
+      const lastFcf = x.fcfs[4];
+      const terminalValue = (lastFcf*(1+x.growth))/(wacc-x.growth);
+      const pvTv = terminalValue/Math.pow(1+wacc,5);
+      const ev = pvFcf+pvTv;
+      latest = { ...x, wacc, pvCashFlows, pvFcf, terminalValue, pvTv, ev };
+
+      $('outWacc').textContent = (wacc*100).toFixed(2)+'%';
+      $('outPvFcf').textContent = money(pvFcf);
+      $('outPvTv').textContent = money(pvTv);
+      $('outEv').textContent = money(ev);
+      $('breakFcf').textContent = money(pvFcf);
+      $('breakTv').textContent = money(pvTv);
+      $('breakEv').textContent = money(ev);
+      updateChart(x.fcfs,pvCashFlows);
+    }
+
+    function updateChart(fcf,pv) {
+      const ctx = $('dcfChart').getContext('2d');
+      if (chart) chart.destroy();
+      chart = new Chart(ctx,{
+        type:'bar',
+        data:{
+          labels:['Year 1','Year 2','Year 3','Year 4','Year 5'],
+          datasets:[
+            {label:'Projected free cash flow',data:fcf,backgroundColor:'rgba(71,125,255,.58)',borderColor:'#668fff',borderWidth:1,borderRadius:7},
+            {label:'Present value',data:pv,backgroundColor:'rgba(66,232,245,.72)',borderColor:'#42e8f5',borderWidth:1,borderRadius:7}
+          ]
+        },
+        options:{
+          responsive:true,maintainAspectRatio:false,
+          interaction:{mode:'index',intersect:false},
+          plugins:{legend:{labels:{color:'#b6c4df',usePointStyle:true,boxWidth:8,font:{family:'DM Sans',size:11}}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${money(c.parsed.y)}`}}},
+          scales:{
+            x:{ticks:{color:'#8493b3',font:{family:'DM Sans'}},grid:{display:false}},
+            y:{beginAtZero:true,ticks:{color:'#8493b3',callback:v=>'R '+Number(v).toLocaleString('en-ZA')},grid:{color:'rgba(255,255,255,.06)'}}
+          }
+        }
+      });
+    }
+
+    const scenarios = {
+      conservative:{fcfs:[125000,140000,155000,170000,185000],growth:2.0,re:14.0,rd:8.5,note:'Conservative case: slower cash-flow growth, higher required returns and lower terminal growth.'},
+      base:{fcfs:[150000,180000,215000,250000,290000],growth:3.0,re:12.0,rd:7.5,note:'Base case: the original illustrative forecast and financing assumptions.'},
+      growth:{fcfs:[170000,215000,270000,335000,410000],growth:4.0,re:11.0,rd:7.0,note:'Growth case: stronger projected cash flows with a lower required return. This is an illustrative scenario, not a forecast.'}
+    };
+
+    document.querySelectorAll('.scenario').forEach(button => {
+      button.addEventListener('click',()=>{
+        const s=scenarios[button.dataset.scenario];
+        s.fcfs.forEach((v,i)=>$('fcf'+(i+1)).value=v);
+        $('growth').value=s.growth;
+        $('costEquity').value=s.re;
+        $('costDebt').value=s.rd;
+        $('scenarioNote').textContent=s.note;
+        runModel();
+      });
+    });
+
+    ids.forEach(id => $(id).addEventListener('input',()=>{ $('scenarioNote').textContent='Custom assumptions active. Results update as you type.'; runModel(); }));
+    $('resetBtn').addEventListener('click',()=>{
+      const defaults={equity:1000000,debt:250000,tax:27,growth:3,costEquity:12,costDebt:7.5,fcf1:150000,fcf2:180000,fcf3:215000,fcf4:250000,fcf5:290000};
+      Object.entries(defaults).forEach(([id,value])=>$(id).value=value);
+      $('scenarioNote').textContent='Base case restored.';
+      runModel();
+    });
+
+    $('csvBtn').addEventListener('click',()=>{
+      if (!latest) { showError('Correct the model inputs before exporting.'); return; }
+      const rows=[
+        ['Zenith Intelligence','DCF Valuation Simulation'],
+        ['Metric','Value'],
+        ['Equity market value (ZAR)',latest.equity],
+        ['Debt market value (ZAR)',latest.debt],
+        ['Tax rate',latest.tax],
+        ['Cost of equity',latest.re],
+        ['Pre-tax cost of debt',latest.rd],
+        ['Terminal growth rate',latest.growth],
+        ['WACC',latest.wacc],
+        ['PV of forecast FCF (ZAR)',latest.pvFcf],
+        ['Terminal value (ZAR)',latest.terminalValue],
+        ['PV of terminal value (ZAR)',latest.pvTv],
+        ['Enterprise value (ZAR)',latest.ev],
+        [],
+        ['Year','Projected FCF (ZAR)','Present value (ZAR)'],
+        ...latest.fcfs.map((v,i)=>[i+1,v,latest.pvCashFlows[i]])
+      ];
+      const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download='Zenith_Intelligence_DCF_Simulation.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    $('year').textContent=new Date().getFullYear();
+    runModel();
+  </script>
+</body>
+</html>
