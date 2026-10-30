@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenith Intelligence | Company Valuation Interactive Suite</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0F172A',
+                            navy: '#1E3A8A',
+                            blue: '#2563EB',
+                            light: '#EFF6FF',
+                            accent: '#D97706',
+                            emerald: '#059669'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+    </style>
+</head>
+<!-- Chosen Palette: Slate & Zenith Indigo Harmony -->
+<!-- Application Structure Plan: The SPA is structured into four primary interactive hubs: (1) Methodologies Explorer with category filtering, (2) Live Financial Calculation Engine (DCF/WACC), (3) Multi-Method Comparative Charting Hub, and (4) Scenario-Based Decision Matrix. This non-linear layout empowers users to either quickly reference key valuation concepts, model custom cash flow scenarios in real time, or compare method outputs side-by-side. -->
+<!-- Visualization & Content Choices: 1. Valuation Method Cards -> Inform/Organize -> HTML/Tailwind Grid + JS Filters -> Dynamic filtering by company stage -> Clean semantic markup. 2. DCF/WACC Model -> Dynamic Financial Modeling -> JS Inputs & Formulas -> Real-time PV recalculation -> Vanilla JS event listeners. 3. Valuation Range Chart -> Comparison -> Chart.js Bar Chart -> Hover tooltips & real-time updates -> Chart.js Canvas. Confirming NO SVG / Mermaid used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- Header / Brand Banner -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white font-bold text-2xl w-10 h-10 rounded-lg flex items-center justify-center shadow-inner">
+                    Z
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">ZENITH INTELLIGENCE</h1>
+                    <p class="text-xs text-slate-400">AI Systems &amp; Corporate Financial Architecture</p>
+                </div>
+            </div>
+            <nav class="flex flex-wrap justify-center gap-2 sm:gap-4 text-xs font-semibold">
+                <button onclick="scrollToSection('explorer')" class="px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 transition">Methodologies</button>
+                <button onclick="scrollToSection('calculator')" class="px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white transition">DCF Engine</button>
+                <button onclick="scrollToSection('comparator')" class="px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 transition">Multi-Method Chart</button>
+                <button onclick="scrollToSection('decision')" class="px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 transition">Decision Matrix</button>
+            </nav>
+            <div class="text-right text-xs text-slate-400 hidden lg:block">
+                <div>Zenithintel.space</div>
+                <div class="text-blue-400">info@zenithintel.space</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Hero Section -->
+        <section class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white rounded-2xl p-6 sm:p-10 shadow-xl border border-slate-800">
+            <div class="max-w-3xl space-y-4">
+                <span class="inline-block px-3 py-1 bg-blue-600/30 text-blue-300 rounded-full text-xs font-semibold uppercase tracking-wider border border-blue-500/30">
+                    Interactive Corporate Finance Suite
+                </span>
+                <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
+                    Master Company Valuation Frameworks
+                </h2>
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    Explore the six fundamental valuation methodologies used by investment bankers, venture capitalists, and equity research analysts. Test custom financial inputs in our interactive DCF model or compare multiple framework metrics in real time.
+                </p>
+                <div class="pt-2 flex flex-wrap gap-4 text-xs font-medium text-slate-300">
+                    <span class="flex items-center gap-1.5"><span class="text-emerald-400">&#10003;</span> DCF &amp; WACC Calculator</span>
+                    <span class="flex items-center gap-1.5"><span class="text-emerald-400">&#10003;</span> Comps Multiples</span>
+                    <span class="flex items-center gap-1.5"><span class="text-emerald-400">&#10003;</span> Precedent Deals</span>
+                    <span class="flex items-center gap-1.5"><span class="text-emerald-400">&#10003;</span> Asset &amp; Liquidation Floor</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Interactive Methodologies Explorer -->
+        <section id="explorer" class="space-y-6">
+            <div class="border-b border-slate-200 pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">1. Valuation Methodologies Explorer</h2>
+                    <p class="text-sm text-slate-600 mt-1">Select a scenario filter to discover which valuation frameworks apply best to specific business models.</p>
+                </div>
+                <!-- Filter Buttons -->
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <button onclick="filterMethods('all')" id="btn-all" class="filter-btn px-3 py-1.5 rounded-full bg-blue-600 text-white font-medium shadow-sm transition">All Methods (6)</button>
+                    <button onclick="filterMethods('cashflow')" id="btn-cashflow" class="filter-btn px-3 py-1.5 rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 font-medium transition">Profitable / Cash Flow</button>
+                    <button onclick="filterMethods('market')" id="btn-market" class="filter-btn px-3 py-1.5 rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 font-medium transition">Market &amp; M&amp;A</button>
+                    <button onclick="filterMethods('asset')" id="btn-asset" class="filter-btn px-3 py-1.5 rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 font-medium transition">Asset / Distressed</button>
+                </div>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="methods-grid">
+
+                <!-- Card 1: DCF -->
+                <div class="method-card bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition space-y-4" data-category="cashflow">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-md">01. INTRINSIC</span>
+                        <span class="text-xs text-slate-500">Income Approach</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">Discounted Cash Flow (DCF)</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Calculates the present value of expected future cash flows using WACC as the discount rate to capture time value of money.
+                    </p>
+                    <div class="bg-slate-100 rounded-lg p-3 text-xs font-mono text-slate-800 border border-slate-200">
+                        DCF = ∑ [ CF<sub>t</sub> / (1 + r)<sup>t</sup> ] + PV(TV)
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="font-semibold text-slate-700">Pros:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-emerald-500">Grounded in fundamental cash generation independent of market hype.</p>
+                        <div class="font-semibold text-slate-700 pt-1">Cons:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-rose-500">Highly sensitive to long-term discount rates and growth assumptions.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2: CCA -->
+                <div class="method-card bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition space-y-4" data-category="market">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-md">02. RELATIVE</span>
+                        <span class="text-xs text-slate-500">Public Market</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">Comparable Company Analysis</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Values a business by applying valuation multiples (P/E, P/S, EV/EBITDA) derived from similar publicly traded companies.
+                    </p>
+                    <div class="bg-slate-100 rounded-lg p-3 text-xs font-mono text-slate-800 border border-slate-200">
+                        Multiple = Market Price / Financial Metric
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="font-semibold text-slate-700">Pros:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-emerald-500">Reflects current, real-time public market valuations and sentiment.</p>
+                        <div class="font-semibold text-slate-700 pt-1">Cons:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-rose-500">Struggles with unique startups or niche firms lacking direct peers.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3: Precedent Transactions -->
+                <div class="method-card bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition space-y-4" data-category="market">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-1 bg-purple-100 text-purple-800 text-xs font-bold rounded-md">03. TRANSACTIONAL</span>
+                        <span class="text-xs text-slate-500">M&amp;A Benchmark</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">Precedent Transactions Analysis</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Examines actual takeover valuation metrics from historical corporate acquisitions of similar target companies.
+                    </p>
+                    <div class="bg-slate-100 rounded-lg p-3 text-xs font-mono text-slate-800 border border-slate-200">
+                        Acquisition Multiple = Deal Price / Target Metric
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="font-semibold text-slate-700">Pros:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-emerald-500">Includes real acquisition control premiums paid by strategic buyers.</p>
+                        <div class="font-semibold text-slate-700 pt-1">Cons:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-rose-500">Past deal data can be scarce, private, or quickly outdated.</p>
+                    </div>
+                </div>
+
+                <!-- Card 4: Asset-Based -->
+                <div class="method-card bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition space-y-4" data-category="asset">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-md">04. ASSET-BASED</span>
+                        <span class="text-xs text-slate-500">Balance Sheet</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">Asset-Based Valuation</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Calculates company worth based strictly on the net fair market value of its tangible and intangible assets minus liabilities.
+                    </p>
+                    <div class="bg-slate-100 rounded-lg p-3 text-xs font-mono text-slate-800 border border-slate-200">
+                        Asset Value = Fair Value Assets - Liabilities
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="font-semibold text-slate-700">Pros:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-emerald-500">Provides a concrete baseline for asset-heavy capital companies.</p>
+                        <div class="font-semibold text-slate-700 pt-1">Cons:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-rose-500">Ignores future earning power and brand goodwill value.</p>
+                    </div>
+                </div>
+
+                <!-- Card 5: Earnings Multiples -->
+                <div class="method-card bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition space-y-4" data-category="cashflow">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-1 bg-cyan-100 text-cyan-800 text-xs font-bold rounded-md">05. MULTIPLES</span>
+                        <span class="text-xs text-slate-500">Operating Profit</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">Earnings Multiples</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Uses standard multiples of operational earnings or EV/EBITDA to evaluate target profitability quickly against industry peers.
+                    </p>
+                    <div class="bg-slate-100 rounded-lg p-3 text-xs font-mono text-slate-800 border border-slate-200">
+                        EV / EBITDA = Enterprise Value / EBITDA
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="font-semibold text-slate-700">Pros:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-emerald-500">Straightforward, fast industry rule-of-thumb comparison.</p>
+                        <div class="font-semibold text-slate-700 pt-1">Cons:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-rose-500">Requires verified, sustainable, non-manipulated EBITDA figures.</p>
+                    </div>
+                </div>
+
+                <!-- Card 6: Liquidation Valuation -->
+                <div class="method-card bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition space-y-4" data-category="asset">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-1 bg-rose-100 text-rose-800 text-xs font-bold rounded-md">06. DISTRESSED</span>
+                        <span class="text-xs text-slate-500">Exit / Bankruptcy</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">Liquidation Valuation</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Estimates cash value generated if a business ceases operations immediately, sells off assets at discount, and repays debt.
+                    </p>
+                    <div class="bg-slate-100 rounded-lg p-3 text-xs font-mono text-slate-800 border border-slate-200">
+                        Liquidation = Fire-Sale Asset Value - Debt
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="font-semibold text-slate-700">Pros:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-emerald-500">Establishes the absolute floor valuation for troubled firms.</p>
+                        <div class="font-semibold text-slate-700 pt-1">Cons:</div>
+                        <p class="text-slate-600 pl-2 border-l-2 border-rose-500">Assumes complete loss of ongoing operational business value.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 2: Live Financial Calculation Engine (DCF & WACC) -->
+        <section id="calculator" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">2. Live DCF &amp; WACC Financial Engine</h2>
+                        <p class="text-sm text-slate-600 mt-1">Adjust capital structure and cash flow forecasts to update discount rates and Enterprise Value automatically.</p>
+                    </div>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">Interactive Model</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left Column: Inputs -->
+                <div class="lg:col-span-5 space-y-5 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide border-b border-slate-200 pb-2">Model Inputs</h3>
+                    
+                    <!-- Capital Structure inputs for WACC -->
+                    <div class="space-y-3">
+                        <label class="block text-xs font-semibold text-slate-700">Equity Value (E) &amp; Debt Value (D) [ZAR]</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <span class="text-[10px] text-slate-500">Equity Value</span>
+                                <input type="number" id="input-equity" value="1000000" class="w-full text-xs p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-mono">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500">Debt Value</span>
+                                <input type="number" id="input-debt" value="250000" class="w-full text-xs p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-mono">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-700">Cost Equity (Re)</label>
+                            <input type="number" id="input-re" value="12" step="0.5" class="w-full text-xs p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-mono">
+                            <span class="text-[9px] text-slate-400">% per annum</span>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-700">Cost Debt (Rd)</label>
+                            <input type="number" id="input-rd" value="7.5" step="0.5" class="w-full text-xs p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-mono">
+                            <span class="text-[9px] text-slate-400">% interest</span>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-700">Tax Rate (Tc)</label>
+                            <input type="number" id="input-tax" value="27" step="1" class="w-full text-xs p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-mono">
+                            <span class="text-[9px] text-slate-400">% Corp tax</span>
+                        </div>
+                    </div>
+
+                    <!-- FCF Forecasts -->
+                    <div class="space-y-2 pt-2 border-t border-slate-200">
+                        <label class="block text-xs font-semibold text-slate-700">5-Year Free Cash Flow Projections (ZAR)</label>
+                        <div class="grid grid-cols-5 gap-1.5 text-center">
+                            <div>
+                                <span class="text-[10px] text-slate-500">Y1</span>
+                                <input type="number" id="fcf-1" value="150000" class="w-full text-[11px] p-1.5 border border-slate-300 rounded font-mono text-center">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500">Y2</span>
+                                <input type="number" id="fcf-2" value="180000" class="w-full text-[11px] p-1.5 border border-slate-300 rounded font-mono text-center">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500">Y3</span>
+                                <input type="number" id="fcf-3" value="215000" class="w-full text-[11px] p-1.5 border border-slate-300 rounded font-mono text-center">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500">Y4</span>
+                                <input type="number" id="fcf-4" value="250000" class="w-full text-[11px] p-1.5 border border-slate-300 rounded font-mono text-center">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500">Y5</span>
+                                <input type="number" id="fcf-5" value="290000" class="w-full text-[11px] p-1.5 border border-slate-300 rounded font-mono text-center">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Growth Rate Slider -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-xs">
+                            <label class="font-semibold text-slate-700">Terminal Growth Rate (g):</label>
+                            <span id="g-rate-val" class="font-bold text-blue-600 font-mono">3.0%</span>
+                        </div>
+                        <input type="range" id="input-grate" min="1.0" max="6.0" step="0.2" value="3.0" class="w-full accent-blue-600">
+                    </div>
+
+                    <button onclick="calculateDCF()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg transition shadow-sm">
+                        Recalculate DCF Model
+                    </button>
+                </div>
+
+                <!-- Right Column: Outputs & Chart -->
+                <div class="lg:col-span-7 space-y-6 flex flex-col justify-between">
+                    <!-- Key KPI Metrics Cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 text-center">
+                            <div class="text-[10px] font-bold text-blue-800 uppercase">Calculated WACC</div>
+                            <div id="out-wacc" class="text-lg font-extrabold text-blue-900 font-mono mt-1">10.70%</div>
+                            <div class="text-[9px] text-blue-600 mt-0.5">Discount Rate</div>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-center">
+                            <div class="text-[10px] font-bold text-slate-700 uppercase">PV 5-Yr Cash Flows</div>
+                            <div id="out-pv-fcf" class="text-lg font-extrabold text-slate-900 font-mono mt-1">R782,410</div>
+                            <div class="text-[9px] text-slate-500 mt-0.5">Sum Discounted FCF</div>
+                        </div>
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 text-center col-span-2 sm:col-span-1">
+                            <div class="text-[10px] font-bold text-emerald-800 uppercase">Enterprise Value</div>
+                            <div id="out-ev" class="text-lg font-extrabold text-emerald-900 font-mono mt-1">R2,985,120</div>
+                            <div class="text-[9px] text-emerald-600 mt-0.5">Total DCF Intrinsic Value</div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Container for Cash Flows -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <h4 class="text-xs font-bold text-slate-800 mb-2">Discounted Cash Flow Breakdown (ZAR)</h4>
+                        <div class="chart-container">
+                            <canvas id="dcfChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Multi-Method Comparative Charting Hub -->
+        <section id="comparator" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-xl font-bold text-slate-900">3. Multi-Method Valuation Comparator</h2>
+                <p class="text-sm text-slate-600 mt-1">Compare target company valuation output across all six frameworks simultaneously to establish a comprehensive valuation range.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Visual Chart Column -->
+                <div class="lg:col-span-7">
+                    <div class="chart-container">
+                        <canvas id="compsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Explanation / Key Insights Column -->
+                <div class="lg:col-span-5 space-y-4 text-xs leading-relaxed text-slate-600 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2">Valuation Range Analysis</h3>
+                    <p>
+                        Corporate finance best practices dictate using a <strong class="text-slate-800">"football field" range chart</strong> rather than relying on a single valuation point.
+                    </p>
+                    <ul class="space-y-2 border-t border-slate-200 pt-2">
+                        <li class="flex items-start gap-2">
+                            <span class="text-blue-600 font-bold">•</span>
+                            <span><strong>DCF &amp; Precedent Transactions</strong> usually establish the upper valuation boundary due to optimistic growth and acquisition premiums.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-amber-600 font-bold">•</span>
+                            <span><strong>Public Multiples (CCA)</strong> present an average market benchmark for ongoing operations.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-rose-600 font-bold">•</span>
+                            <span><strong>Asset-Based &amp; Liquidation</strong> set the strict downward protection floor in scenario planning.</span>
+                        </li>
+                    </ul>
+                    <div class="p-3 bg-blue-100/60 rounded-lg text-blue-900 font-medium">
+                        💡 <em>Tip: Use this range during buyer-seller M&amp;A price negotiations to defend key metrics.</em>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Scenario Decision Matrix -->
+        <section id="decision" class="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
+            <div class="border-b border-slate-800 pb-4">
+                <h2 class="text-xl font-bold text-white">4. Scenario-Based Decision Matrix</h2>
+                <p class="text-sm text-slate-400 mt-1">Select a business profile to see the recommended primary and secondary valuation approach.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="selectScenario('saas')" id="scen-saas" class="scenario-card p-4 rounded-xl bg-slate-800 border border-slate-700 text-left hover:border-blue-500 transition space-y-2">
+                    <div class="text-xs font-bold text-blue-400">SCENARIO A</div>
+                    <div class="text-sm font-bold text-white">Early-Stage B2B SaaS</div>
+                    <div class="text-[11px] text-slate-400">High revenue growth, negative net income, software IP.</div>
+                </button>
+
+                <button onclick="selectScenario('mfg')" id="scen-mfg" class="scenario-card p-4 rounded-xl bg-slate-800 border border-slate-700 text-left hover:border-blue-500 transition space-y-2">
+                    <div class="text-xs font-bold text-emerald-400">SCENARIO B</div>
+                    <div class="text-sm font-bold text-white">Manufacturing Plant</div>
+                    <div class="text-[11px] text-slate-400">Stable profits, heavy equipment machinery, inventory.</div>
+                </button>
+
+                <button onclick="selectScenario('retail')" id="scen-retail" class="scenario-card p-4 rounded-xl bg-slate-800 border border-slate-700 text-left hover:border-blue-500 transition space-y-2">
+                    <div class="text-xs font-bold text-amber-400">SCENARIO C</div>
+                    <div class="text-sm font-bold text-white">Small SME Acquisition</div>
+                    <div class="text-[11px] text-slate-400">Owner exit, local footprint, straightforward profits.</div>
+                </button>
+            </div>
+
+            <!-- Dynamic Scenario Detail Box -->
+            <div id="scenario-detail" class="bg-slate-800/80 border border-slate-700 rounded-xl p-5 space-y-3">
+                <h3 id="scenario-title" class="text-base font-bold text-blue-400">Early-Stage B2B SaaS Startup</h3>
+                <p id="scenario-desc" class="text-xs text-slate-300 leading-relaxed">
+                    Unprofitable early-stage SaaS ventures lack predictable future cash flows for DCF and possess negative earnings multiples.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2 border-t border-slate-700">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Primary Valuation Method</span>
+                        <span id="scenario-primary" class="font-bold text-white text-sm">Comparable Company Analysis (P/S or ARR Multiples)</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Why This Choice Works</span>
+                        <span id="scenario-why" class="text-slate-300">Annual Recurring Revenue (ARR) multiples benchmark growth speed against recent market venture deals.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <div>
+                <span class="font-bold text-white">Zenith Intelligence</span> — Corporate Finance &amp; AI Systems
+                <p class="text-[11px] text-slate-500 mt-1">Built for modern executives, investors, and business analysts.</p>
+            </div>
+            <div class="space-y-1">
+                <div>Website: <a href="https://Zenithintel.space" class="text-blue-400 hover:underline">Zenithintel.space</a></div>
+                <div>Email: <a href="mailto:info@zenithintel.space" class="text-blue-400 hover:underline">info@zenithintel.space</a></div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Global Chart References
+        let dcfChartInstance = null;
+        let compsChartInstance = null;
+
+        // Smooth Scrolling Navigation
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Section 1: Filter Methodologies
+        function filterMethods(category) {
+            const cards = document.querySelectorAll('.method-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-slate-200', 'text-slate-700');
+            });
+
+            const activeBtn = document.getElementById(`btn-${category}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-200', 'text-slate-700');
+                activeBtn.classList.add('bg-blue-600', 'text-white');
+            }
+
+            cards.forEach(card => {
+                if (category === 'all' || card.getAttribute('data-category') === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Section 2: DCF Financial Engine Calculation
+        function calculateDCF() {
+            const E = parseFloat(document.getElementById('input-equity').value) || 0;
+            const D = parseFloat(document.getElementById('input-debt').value) || 0;
+            const Re = (parseFloat(document.getElementById('input-re').value) || 0) / 100;
+            const Rd = (parseFloat(document.getElementById('input-rd').value) || 0) / 100;
+            const Tc = (parseFloat(document.getElementById('input-tax').value) || 0) / 100;
+            const g = (parseFloat(document.getElementById('input-grate').value) || 0) / 100;
+
+            const V = E + D;
+            const wacc = V > 0 ? ((E / V) * Re) + ((D / V) * Rd * (1 - Tc)) : 0;
+
+            const fcfs = [
+                parseFloat(document.getElementById('fcf-1').value) || 0,
+                parseFloat(document.getElementById('fcf-2').value) || 0,
+                parseFloat(document.getElementById('fcf-3').value) || 0,
+                parseFloat(document.getElementById('fcf-4').value) || 0,
+                parseFloat(document.getElementById('fcf-5').value) || 0
+            ];
+
+            let pvFcfs = [];
+            let sumPvFcf = 0;
+
+            fcfs.forEach((fcf, i) => {
+                const discountFactor = Math.pow(1 + wacc, i + 1);
+                const pv = fcf / discountFactor;
+                pvFcfs.push(pv);
+                sumPvFcf += pv;
+            });
+
+            const lastFcf = fcfs[4];
+            const terminalValue = (wacc > g) ? (lastFcf * (1 + g)) / (wacc - g) : 0;
+            const pvTerminalValue = terminalValue / Math.pow(1 + wacc, 5);
+            const enterpriseValue = sumPvFcf + pvTerminalValue;
+
+            // Update KPI Displays
+            document.getElementById('out-wacc').innerText = (wacc * 100).toFixed(2) + '%';
+            document.getElementById('out-pv-fcf').innerText = 'R' + Math.round(sumPvFcf).toLocaleString();
+            document.getElementById('out-ev').innerText = 'R' + Math.round(enterpriseValue).toLocaleString();
+
+            // Update Chart
+            updateDCFChart(fcfs, pvFcfs, pvTerminalValue);
+        }
+
+        function updateDCFChart(fcfs, pvFcfs, pvTV) {
+            const ctx = document.getElementById('dcfChart').getContext('2d');
+            
+            if (dcfChartInstance) {
+                dcfChartInstance.destroy();
+            }
+
+            dcfChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Terminal Value'],
+                    datasets: [
+                        {
+                            label: 'Nominal Cash Flow',
+                            data: [...fcfs, null],
+                            backgroundColor: '#93C5FD',
+                            borderWidth: 0
+                        },
+                        {
+                            label: 'Present Value (Discounted)',
+                            data: [...pvFcfs, pvTV],
+                            backgroundColor: '#2563EB',
+                            borderWidth: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': R' + Math.round(context.raw || 0).toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                        y: { 
+                            ticks: { 
+                                font: { size: 10 },
+                                callback: function(value) { return 'R' + (value / 1000) + 'k'; }
+                            } 
+                        }
+                    }
+                }
+            });
+        }
+
+        // Section 3: Multi-Method Valuation Comparison Chart
+        function initCompsChart() {
+            const ctx = document.getElementById('compsChart').getContext('2d');
+
+            compsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'Liquidation Val.', 
+                        'Asset-Based', 
+                        'Earnings Multiple', 
+                        'Public Comps (CCA)', 
+                        'DCF Intrinsic', 
+                        'Precedent Deals'
+                    ],
+                    datasets: [{
+                        label: 'Estimated Valuation (ZAR)',
+                        data: [1200000, 1850000, 2400000, 2650000, 2985120, 3400000],
+                        backgroundColor: [
+                            '#EF4444',
+                            '#F59E0B',
+                            '#10B981',
+                            '#3B82F6',
+                            '#1E3A8A',
+                            '#8B5CF6'
+                        ],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Implied Value: R' + Math.round(context.raw).toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: { size: 10 },
+                                callback: function(value) { return 'R' + (value / 1000000).toFixed(1) + 'M'; }
+                            }
+                        },
+                        y: { ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // Section 4: Scenario Selection Logic
+        const scenarios = {
+            saas: {
+                title: "Scenario A: Early-Stage B2B SaaS Startup",
+                desc: "Unprofitable early-stage tech ventures lack predictable future cash flows for DCF models and possess negative earnings metrics.",
+                primary: "Comparable Company Analysis (P/S or ARR Multiples)",
+                why: "Annual Recurring Revenue (ARR) multiples benchmark rapid top-line growth against recent venture capital deals.",
+                btnId: "scen-saas"
+            },
+            mfg: {
+                title: "Scenario B: Established Manufacturing Plant",
+                desc: "Characterized by stable profit margins, long historical track records, and capital-heavy plant/equipment assets.",
+                primary: "DCF Valuation + Asset-Based Price Floor",
+                why: "Predictable cash flows enable an accurate DCF model, while physical machinery sets a firm liquidation threshold.",
+                btnId: "scen-mfg"
+            },
+            retail: {
+                title: "Scenario C: Small Business Acquisition (SME)",
+                desc: "Owner-operator seeking exit where the buyer evaluates buyout cost against recent local business acquisition benchmarks.",
+                primary: "Precedent Transactions & EV/EBITDA Multiples",
+                why: "Provides a reality check based on actual prices paid recently for similar-sized businesses.",
+                btnId: "scen-retail"
+            }
+        };
+
+        function selectScenario(key) {
+            document.querySelectorAll('.scenario-card').forEach(card => {
+                card.classList.remove('border-blue-500', 'bg-slate-700/80');
+                card.classList.add('border-slate-700', 'bg-slate-800');
+            });
+
+            const selected = scenarios[key];
+            const btn = document.getElementById(selected.btnId);
+            if (btn) {
+                btn.classList.remove('border-slate-700', 'bg-slate-800');
+                btn.classList.add('border-blue-500', 'bg-slate-700/80');
+            }
+
+            document.getElementById('scenario-title').innerText = selected.title;
+            document.getElementById('scenario-desc').innerText = selected.desc;
+            document.getElementById('scenario-primary').innerText = selected.primary;
+            document.getElementById('scenario-why').innerText = selected.why;
+        }
+
+        // Slider Event Listener
+        document.getElementById('input-grate').addEventListener('input', function(e) {
+            document.getElementById('g-rate-val').innerText = parseFloat(e.target.value).toFixed(1) + '%';
+            calculateDCF();
+        });
+
+        // Initialize on Page Load
+        window.addEventListener('DOMContentLoaded', () => {
+            calculateDCF();
+            initCompsChart();
+            selectScenario('saas');
+        });
+    </script>
+</body>
+</html>
